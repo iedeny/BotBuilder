@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Bot.Connector</name>
+    </assembly>
+    <members>
+        <member name="P:Microsoft.Bot.Connector.BotAuthentication.MicrosoftAppId">
+            <summary>
+            Microsoft AppId for the bot 
+            </summary>
+            <remarks>
+            Needs to be used with MicrosoftAppPassword.  Ignored if CredentialProviderType is specified.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Bot.Connector.BotAuthentication.MicrosoftAppPassword">
+            <summary>
+            Microsoft AppPassword for the bot (needs to be used with MicrosoftAppId)
+            </summary>
+            <remarks>
+            Needs to be used with MicrosoftAppId. Ignored if CredentialProviderType is specified.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Bot.Connector.BotAuthentication.MicrosoftAppIdSettingName">
+            <summary>
+            Name of Setting in web.config which has the Microsoft AppId for the bot 
+            </summary>
+            <remarks>
+            Needs to be used with MicrosoftAppPasswordSettingName. Ignored if CredentialProviderType is specified.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Bot.Connector.BotAuthentication.MicrosoftAppPasswordSettingName">
+            <summary>
+            Name of Setting in web.config which has the Microsoft App Password for the bot 
+            </summary>
+            <remarks>
+            Needs to be used with MicrosoftAppIdSettingName. Ignored if CredentialProviderType is specified.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Bot.Connector.BotAuthentication.CredentialProviderType">
+            <summary>
+            Type which implements ICredentialProvider interface to allow multiple bot AppIds to be registered for the same endpoint
+            </summary>
+        </member>
+    </members>
+</doc>
