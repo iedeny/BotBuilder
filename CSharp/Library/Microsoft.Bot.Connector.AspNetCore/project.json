@@ -18,6 +18,9 @@
     "netstandard1.6": {
       "imports": "dnxcore50",
       "dependencies": {
+        "Microsoft.Bot.Connector.Abstractions": {
+          "target": "project"
+        },
         "Microsoft.Bot.Connector.NetCore": {
           "target": "project"
         }
