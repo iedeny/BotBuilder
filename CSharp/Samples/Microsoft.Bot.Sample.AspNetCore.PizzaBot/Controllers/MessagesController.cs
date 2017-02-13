@@ -13,7 +13,7 @@ namespace Microsoft.Bot.Sample.AspNetCore.Pizza.Controllers
     {
         private readonly IConfigurationRoot configuration;
 
-        private static IForm<PizzaOrder> BuildForm()
+        /*private static IForm<PizzaOrder> BuildForm()
         {
             var builder = new FormBuilder<PizzaOrder>();
 
@@ -79,6 +79,31 @@ namespace Microsoft.Bot.Sample.AspNetCore.Pizza.Controllers
             }
 
 
+            await client.Conversations.ReplyToActivityAsync(reply);
+            return Ok();
+        }*/
+
+        public MessagesController(IConfigurationRoot configuration)
+        {
+            this.configuration = configuration;
+        }
+
+        [Authorize(Roles = "Bot")]
+        // POST api/values
+        [HttpPost]
+        public virtual async Task<OkResult> Post([FromBody]Activity activity)
+        {
+            var appCredentials = new MicrosoftAppCredentials(this.configuration);
+            var client = new ConnectorClient(new Uri(activity.ServiceUrl), appCredentials);
+            var reply = activity.CreateReply();
+            if (activity.Type == ActivityTypes.Message)
+            {
+                reply.Text = $"echo: {activity.Text}";
+            }
+            else
+            {
+                reply.Text = $"activity type: {activity.Type}";
+            }
             await client.Conversations.ReplyToActivityAsync(reply);
             return Ok();
         }
