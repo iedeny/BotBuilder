@@ -20,6 +20,9 @@
       "dependencies": {
         "Microsoft.Bot.Connector.NetCore": {
           "target": "project"
+        },
+        "Microsoft.Bot.Connector.Shared": {
+          "target": "project"
         }
       }
     }

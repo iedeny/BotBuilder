@@ -1,12 +1,5 @@
-﻿#if !NET45
-using Microsoft.Extensions.Configuration;
-#endif
-using System;
+﻿using System;
 using System.Threading.Tasks;
-
-#if NET45
-using System.Configuration;
-#endif 
 
 namespace Microsoft.Bot.Connector
 {
@@ -66,36 +59,4 @@ namespace Microsoft.Bot.Connector
             this.Password = password;
         }
     }
-
-#if NET45
-    /// <summary>
-    /// Credential provider which uses config settings to lookup appId and password
-    /// </summary>
-    public sealed class SettingsCredentialProvider : SimpleCredentialProvider
-    {
-        public SettingsCredentialProvider(string appIdSettingName = null, string appPasswordSettingName = null)
-        {
-            var appIdKey = appIdSettingName ?? MicrosoftAppCredentials.MicrosoftAppIdKey;
-            var passwordKey = appPasswordSettingName ?? MicrosoftAppCredentials.MicrosoftAppPasswordKey;
-            this.AppId = ConfigurationManager.AppSettings[appIdKey] ?? Environment.GetEnvironmentVariable(appIdKey, EnvironmentVariableTarget.Process);
-            this.Password = ConfigurationManager.AppSettings[passwordKey] ?? Environment.GetEnvironmentVariable(passwordKey, EnvironmentVariableTarget.Process);
-        }
-    }
-#else
-    /// <summary>
-    /// Credential provider which uses <see cref="Microsoft.Extensions.Configuration.IConfiguration"/> to lookup appId and password
-    /// </summary>
-    public sealed class ConfigurationCredentialProvider : SimpleCredentialProvider
-    {
-        public ConfigurationCredentialProvider(IConfiguration configuration,
-            string appIdSettingName = null,
-            string appPasswordSettingName = null)
-        {
-            var appIdKey = appIdSettingName ?? MicrosoftAppCredentials.MicrosoftAppIdKey;
-            var passwordKey = appPasswordSettingName ?? MicrosoftAppCredentials.MicrosoftAppPasswordKey;
-            this.AppId = configuration.GetSection(appIdKey)?.Value;
-            this.Password = configuration.GetSection(passwordKey)?.Value;
-        }
-    }
-#endif
 }
