@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Bot.Connector.NetCore\Microsoft.Bot.Connector.NetCore.csproj" />
+    <ProjectReference Include="..\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.csproj" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.targets" Condition="'$(VSToolsPath)' != ''" />
 </Project>
