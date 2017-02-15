@@ -118,6 +118,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Bot.Connector.Sha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Bot.Connector.AspNetCore", "Library\Microsoft.Bot.Connector.AspNetCore\Microsoft.Bot.Connector.AspNetCore.csproj", "{8A103487-CED2-4CBB-B070-7AA99D43A6C0}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Bot.Connector.AspNetCore", "Library\Microsoft.Bot.Connector.AspNetCore\Microsoft.Bot.Connector.AspNetCore.xproj", "{2E2551AB-EA81-44FD-8D0E-89D55197AC76}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.Bot.Connector.Shared", "Library\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.xproj", "{25E08BCA-F209-40F7-B7BB-BD1DF587056C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -273,6 +277,18 @@ Global
 		{8A103487-CED2-4CBB-B070-7AA99D43A6C0}.Documentation|Any CPU.Build.0 = Debug|Any CPU
 		{8A103487-CED2-4CBB-B070-7AA99D43A6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A103487-CED2-4CBB-B070-7AA99D43A6C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E2551AB-EA81-44FD-8D0E-89D55197AC76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Documentation|Any CPU.ActiveCfg = Debug|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Documentation|Any CPU.Build.0 = Debug|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25E08BCA-F209-40F7-B7BB-BD1DF587056C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

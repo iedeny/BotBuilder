@@ -34,7 +34,7 @@ namespace Microsoft.Bot.Sample.AspNetCore.Echo
             // Add framework services.
             services.AddMvc(options =>
             {
-                options.Filters.Add(typeof(TrustServiceUrlAttribute));
+                //options.Filters.Add(typeof(TrustServiceUrlAttribute));
             });
         }
 

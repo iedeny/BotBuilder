@@ -1,11 +1,11 @@
-﻿{
+{
   "title": "Microsoft.Bot.Connector",
   "language": "en",
   "version": "3.5.1-*",
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Microsoft.AspNetCore.Authentication.JwtBearer": "1.0.0",
-    "System.IdentityModel.Tokens.Jwt": "5.0.0"
+    "System.IdentityModel.Tokens.Jwt": "5.0.0",
   },
   "buildOptions": {
     "outputName": "Microsoft.Bot.Connector",
