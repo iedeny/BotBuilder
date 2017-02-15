@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Bot.Builder.History</RootNamespace>
     <AssemblyName>Microsoft.Bot.Builder.History</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -57,13 +57,15 @@
       <Project>{cdfec7d6-847e-4c13-956b-0a960ae3eb60}</Project>
       <Name>Microsoft.Bot.Builder</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Bot.Connector.NetFramework\Microsoft.Bot.Connector.csproj">
-      <Project>{df397efc-91db-4911-9971-c509926fc288}</Project>
-      <Name>Microsoft.Bot.Connector</Name>
+    <ProjectReference Include="..\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.csproj">
+      <Project>{bbb63ef8-a6c2-44d5-8647-03b63f17ad2d}</Project>
+      <Name>Microsoft.Bot.Connector.Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="createpackage.cmd" />
     <None Include="Microsoft.Bot.Builder.History.nuspec" />
     <None Include="packages.config" />

@@ -1,4 +1,4 @@
-﻿{
+{
   "supports": {},
   "dependencies": {
     "Microsoft.IdentityModel.Protocols.OpenIdConnect": "2.0.0",
