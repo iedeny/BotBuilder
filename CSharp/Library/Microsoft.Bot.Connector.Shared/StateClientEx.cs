@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web;
 
-// TODO FIX ME
+// TODO: FIX ME
 ////#if NET45
 ////using System.Security.Claims;
 ////using System.Threading;
@@ -40,7 +40,7 @@ namespace Microsoft.Bot.Connector
             this.Credentials = credentials;
         }
 
-        // TODO FIX ME
+        // TODO: FIX ME
 //#if NET45
                 /// <summary>
                 /// Create a new instance of the StateClient class using Credential source
@@ -54,7 +54,7 @@ namespace Microsoft.Bot.Connector
                 {
             if (claimsIdentity == null)
                 claimsIdentity = HttpContext.Current.User.Identity as ClaimsIdentity ??
-                // TODO FIX ME  
+                // TODO: FIX ME  
                 // Thread.CurrentPrincipal.Identity as ClaimsIdentity;
                 null;
 

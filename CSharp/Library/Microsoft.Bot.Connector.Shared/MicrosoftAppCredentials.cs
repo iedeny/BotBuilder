@@ -6,17 +6,19 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if !NET45
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-#endif
+// TODO: fix me
+////#if !NET45
+////using Microsoft.Extensions.Configuration;
+////using Microsoft.Extensions.Logging;
+////#endif
 using Microsoft.Rest;
 using Newtonsoft.Json;
 
-#if NET45
-using System.Configuration;
-using System.Diagnostics;
-#endif
+// TODO: fix me
+////#if NET45
+////using System.Configuration;
+////using System.Diagnostics;
+////#endif
 
 namespace Microsoft.Bot.Connector
 {
@@ -39,11 +41,11 @@ namespace Microsoft.Bot.Connector
 
         protected static readonly ConcurrentDictionary<string, OAuthResponse> cache = new ConcurrentDictionary<string, OAuthResponse>();
 
-#if !NET45
-        protected ILogger logger;
-#endif
+        // TODO: FIX ME
+//#if !NET45
+//        protected ILogger logger;
+//#endif
 
-#if NET45
         public MicrosoftAppCredentials(string appId = null, string password = null)
         {
             MicrosoftAppId = appId;
@@ -51,33 +53,37 @@ namespace Microsoft.Bot.Connector
 
             if(appId == null)
             {
-                MicrosoftAppId = ConfigurationManager.AppSettings[MicrosoftAppIdKey] ?? Environment.GetEnvironmentVariable(MicrosoftAppIdKey, EnvironmentVariableTarget.Process);
+                // TODO: FIX ME
+                MicrosoftAppId = string.Empty;
+                // MicrosoftAppId = ConfigurationManager.AppSettings[MicrosoftAppIdKey] ?? Environment.GetEnvironmentVariable(MicrosoftAppIdKey, EnvironmentVariableTarget.Process);
             }
 
             if(password == null)
             {
-                MicrosoftAppPassword = ConfigurationManager.AppSettings[MicrosoftAppPasswordKey] ?? Environment.GetEnvironmentVariable(MicrosoftAppPasswordKey, EnvironmentVariableTarget.Process);
+                // TODO: FIX ME
+                MicrosoftAppPassword = string.Empty;
+                // MicrosoftAppPassword = ConfigurationManager.AppSettings[MicrosoftAppPasswordKey] ?? Environment.GetEnvironmentVariable(MicrosoftAppPasswordKey, EnvironmentVariableTarget.Process);
             }
 
             TokenCacheKey = $"{MicrosoftAppId}-cache";
         }
-#else
-        public MicrosoftAppCredentials(string appId = null, string password = null, ILogger logger = null)
-        {
-            MicrosoftAppId = appId;
-            MicrosoftAppPassword = password;
 
-            TokenCacheKey = $"{MicrosoftAppId}-cache";
-            this.logger = logger;
-        }
+        // TODO: FIX ME
+        ////public MicrosoftAppCredentials(string appId = null, string password = null, ILogger logger = null)
+        ////{
+        ////    MicrosoftAppId = appId;
+        ////    MicrosoftAppPassword = password;
 
-        public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger = null)
-            : this(configuration.GetSection(MicrosoftAppIdKey)?.Value, configuration.GetSection(MicrosoftAppPasswordKey)?.Value, logger)
-        {
-        }
-#endif
+        ////    TokenCacheKey = $"{MicrosoftAppId}-cache";
 
+        ////    this.logger = logger;
+        ////}
 
+        // TODO: FIX ME
+        //public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger = null)
+        //    : this(configuration.GetSection(MicrosoftAppIdKey)?.Value, configuration.GetSection(MicrosoftAppPasswordKey)?.Value, logger)
+        //{
+        //}
 
         public string MicrosoftAppId { get; set; }
         public string MicrosoftAppPassword { get; set; }
@@ -109,9 +115,8 @@ namespace Microsoft.Bot.Connector
             }
             catch (Exception)
             {
-#if NET45
-                Trace.TraceWarning($"Service url {serviceUrl} is not a well formed Uri!");
-#endif
+                // TODO: FIX ME
+                // Trace.TraceWarning($"Service url {serviceUrl} is not a well formed Uri!");
             }
         }
 
@@ -169,11 +174,12 @@ namespace Microsoft.Bot.Connector
                 return true;
             }
 
-#if NET45
-            Trace.TraceWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
-#else
-            logger?.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
-#endif
+            // TODO: FIX ME
+////#if NET45
+////            Trace.TraceWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
+////#else
+////            logger?.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
+////#endif
             return false;
         }
 

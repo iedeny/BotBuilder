@@ -75,7 +75,7 @@ namespace Microsoft.Bot.Connector
         public static HttpResponseMessage GenerateUnauthorizedResponse(HttpRequestMessage request)
         {
             string host = request.RequestUri.DnsSafeHost;
-            // TODO FIX ME
+            // TODO: FIX ME
             ////#if NET45
 ////            var response = request.CreateResponse(HttpStatusCode.Unauthorized);
 ////#else
@@ -100,7 +100,7 @@ namespace Microsoft.Bot.Connector
                 }
                 else
                 {
-                    // TODO FIX ME
+                    // TODO: FIX ME
 ////#if NET45
 ////                    Trace.TraceWarning("No ServiceUrls added to trusted list");
 ////#endif
@@ -171,7 +171,7 @@ namespace Microsoft.Bot.Connector
 
             if (identity != null)
             {
-                // TODO FIX ME
+                // TODO: FIX ME
 ////#if NET45
 ////                Thread.CurrentPrincipal = new ClaimsPrincipal(identity);
 

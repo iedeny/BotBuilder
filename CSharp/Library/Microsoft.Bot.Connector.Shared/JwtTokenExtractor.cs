@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-// TODO FIX ME
+// TODO: FIX ME
 ////#if NET45
 ////using System.Diagnostics;
 ////#endif
@@ -48,7 +48,7 @@ namespace Microsoft.Bot.Connector
 
             if (!_openIdMetadataCache.ContainsKey(metadataUrl))
             {
-                // TODO FIX ME
+                // TODO: FIX ME
                 _openIdMetadataCache[metadataUrl] = new ConfigurationManager<OpenIdConnectConfiguration>(metadataUrl, new OpenIdConnectConfigurationRetriever());
             }
 
@@ -90,7 +90,7 @@ namespace Microsoft.Bot.Connector
             }
             catch (Exception e)
             {
-// TODO FIX ME
+// TODO: FIX ME
 ////#if NET45
 ////                Trace.TraceWarning("Invalid token. " + e.ToString());
 ////#else
@@ -153,7 +153,7 @@ namespace Microsoft.Bot.Connector
             }
             catch (Exception e)
             {
-// TODO FIX ME
+// TODO: FIX ME
 ////#if NET45
 ////                Trace.TraceError($"Error refreshing OpenId configuration: {e}");
 ////#else
@@ -179,7 +179,7 @@ namespace Microsoft.Bot.Connector
             }
             catch (SecurityTokenSignatureKeyNotFoundException)
             {
-                // TODO FIX ME
+                // TODO: FIX ME
                 string keys = string.Join(", ", ((config?.SigningKeys) ?? Enumerable.Empty<SecurityKey>()).Select(t => t.KeyId));
                 IdentityModel.Logging.LogHelper.LogException<SecurityTokenSignatureKeyNotFoundException>("Error finding key for token.Available keys: " + keys);
                 throw;
