@@ -173,6 +173,10 @@
       <Project>{8674f271-4437-4178-b4e2-15f91b322e5d}</Project>
       <Name>Microsoft.Bot.Builder.FormFlow.Json</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Library\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.csproj">
+      <Project>{bbb63ef8-a6c2-44d5-8647-03b63f17ad2d}</Project>
+      <Name>Microsoft.Bot.Connector.Shared</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

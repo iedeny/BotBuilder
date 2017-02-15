@@ -109,6 +109,10 @@
       <Project>{df397efc-91db-4911-9971-c509926fc288}</Project>
       <Name>Microsoft.Bot.Connector</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Library\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.csproj">
+      <Project>{bbb63ef8-a6c2-44d5-8647-03b63f17ad2d}</Project>
+      <Name>Microsoft.Bot.Connector.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Samples\AlarmBot\Microsoft.Bot.Sample.AlarmBot.csproj">
       <Project>{d414f82f-c102-45b1-979c-d905d278c34e}</Project>
       <Name>Microsoft.Bot.Sample.AlarmBot</Name>

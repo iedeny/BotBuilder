@@ -128,6 +128,10 @@
       <Project>{df397efc-91db-4911-9971-c509926fc288}</Project>
       <Name>Microsoft.Bot.Connector</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Library\Microsoft.Bot.Connector.Shared\Microsoft.Bot.Connector.Shared.csproj">
+      <Project>{bbb63ef8-a6c2-44d5-8647-03b63f17ad2d}</Project>
+      <Name>Microsoft.Bot.Connector.Shared</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Tests\Microsoft.Bot.Builder.Tests\Microsoft.Bot.Builder.Tests.csproj">
       <Project>{508661a7-f47a-4d60-8ed6-69e378ed0e74}</Project>
       <Name>Microsoft.Bot.Builder.Tests</Name>
