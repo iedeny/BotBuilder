@@ -1,11 +1,11 @@
 ﻿namespace Microsoft.Bot.Connector
 {
     using System;
-#if NET45
-    using System.IdentityModel.Tokens;
-#else
+////#if NET45
+////    using System.IdentityModel.Tokens;
+////#else
     using Microsoft.IdentityModel.Tokens;
-#endif
+////#endif
 
     /// <summary>
     /// Configuration for JWT tokens

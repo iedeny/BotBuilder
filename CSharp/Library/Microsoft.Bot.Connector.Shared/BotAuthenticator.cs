@@ -6,11 +6,6 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-#if NET45
-using System.Diagnostics;
-using System.Web;
-#endif
-
 
 namespace Microsoft.Bot.Connector
 {
@@ -80,11 +75,12 @@ namespace Microsoft.Bot.Connector
         public static HttpResponseMessage GenerateUnauthorizedResponse(HttpRequestMessage request)
         {
             string host = request.RequestUri.DnsSafeHost;
-#if NET45
-            var response = request.CreateResponse(HttpStatusCode.Unauthorized);
-#else
+            // TODO FIX ME
+            ////#if NET45
+////            var response = request.CreateResponse(HttpStatusCode.Unauthorized);
+////#else
             var response = new HttpResponseMessage(HttpStatusCode.Unauthorized);
-#endif
+////#endif
             response.Headers.Add("WWW-Authenticate", string.Format("Bearer realm=\"{0}\"", host));
             return response;
         }
@@ -104,9 +100,10 @@ namespace Microsoft.Bot.Connector
                 }
                 else
                 {
-#if NET45
-                    Trace.TraceWarning("No ServiceUrls added to trusted list");
-#endif
+                    // TODO FIX ME
+////#if NET45
+////                    Trace.TraceWarning("No ServiceUrls added to trusted list");
+////#endif
                 }
             }
         }
@@ -174,13 +171,14 @@ namespace Microsoft.Bot.Connector
 
             if (identity != null)
             {
-#if NET45
-                Thread.CurrentPrincipal = new ClaimsPrincipal(identity);
+                // TODO FIX ME
+////#if NET45
+////                Thread.CurrentPrincipal = new ClaimsPrincipal(identity);
 
-                // Inside of ASP.NET this is required
-                if (HttpContext.Current != null)
-                    HttpContext.Current.User = Thread.CurrentPrincipal;
-#endif
+////                // Inside of ASP.NET this is required
+////                if (HttpContext.Current != null)
+////                    HttpContext.Current.User = Thread.CurrentPrincipal;
+////#endif
 
                 return new IdentityToken(true, identity);
             }

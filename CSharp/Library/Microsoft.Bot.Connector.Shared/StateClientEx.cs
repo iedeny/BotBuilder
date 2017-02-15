@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-
-#if NET45
 using System.Security.Claims;
-using System.Threading;
 using System.Web;
-#endif
+
+// TODO FIX ME
+////#if NET45
+////using System.Security.Claims;
+////using System.Threading;
+////using System.Web;
+////#endif
 
 namespace Microsoft.Bot.Connector
 {
@@ -37,39 +40,43 @@ namespace Microsoft.Bot.Connector
             this.Credentials = credentials;
         }
 
-#if NET45
-        /// <summary>
-        /// Create a new instance of the StateClient class using Credential source
-        /// </summary>
-        /// <param name="baseUri">Base URI for the State service</param>
-        /// <param name="credentialProvider">Credential source to use</param>
-        /// <param name="claimsIdentity">ClaimsIDentity to create the client for</param>
-        /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
-        public StateClient(Uri baseUri, ICredentialProvider credentialProvider, ClaimsIdentity claimsIdentity = null, params DelegatingHandler[] handlers)
-            : this(baseUri, handlers: handlers)
-        {
+        // TODO FIX ME
+//#if NET45
+                /// <summary>
+                /// Create a new instance of the StateClient class using Credential source
+                /// </summary>
+                /// <param name="baseUri">Base URI for the State service</param>
+                /// <param name="credentialProvider">Credential source to use</param>
+                /// <param name="claimsIdentity">ClaimsIDentity to create the client for</param>
+                /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
+                public StateClient(Uri baseUri, ICredentialProvider credentialProvider, ClaimsIdentity claimsIdentity = null, params DelegatingHandler[] handlers)
+                    : this(baseUri, handlers: handlers)
+                {
             if (claimsIdentity == null)
-                claimsIdentity = HttpContext.Current.User.Identity as ClaimsIdentity ?? Thread.CurrentPrincipal.Identity as ClaimsIdentity;
+                claimsIdentity = HttpContext.Current.User.Identity as ClaimsIdentity ??
+                // TODO FIX ME  
+                // Thread.CurrentPrincipal.Identity as ClaimsIdentity;
+                null;
 
-            if (claimsIdentity == null)
-                throw new ArgumentNullException("ClaimsIdentity not passed in and not available via Thread.CurrentPrincipal.Identity");
+                    if (claimsIdentity == null)
+                        throw new ArgumentNullException("ClaimsIdentity not passed in and not available via Thread.CurrentPrincipal.Identity");
 
-            var appId = claimsIdentity.GetAppIdFromClaims();
-            var password = credentialProvider.GetAppPasswordAsync(appId).Result;
-            this.Credentials = new MicrosoftAppCredentials(appId, password);
-        }
+                    var appId = claimsIdentity.GetAppIdFromClaims();
+                    var password = credentialProvider.GetAppPasswordAsync(appId).Result;
+                    this.Credentials = new MicrosoftAppCredentials(appId, password);
+                }
 
-        /// <summary>
-        /// Create a new instance of the StateClient class using Credential source
-        /// </summary>
-        /// <param name="credentialProvider">Credential source to use</param>
-        /// <param name="claimsIdentity">ClaimsIDentity to create the client for</param>
-        /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
-        public StateClient(ICredentialProvider credentialProvider, ClaimsIdentity claimsIdentity = null, params DelegatingHandler[] handlers)
-            : this(null, credentialProvider, claimsIdentity, handlers: handlers)
-        {
-        }
-#endif
+                /// <summary>
+                /// Create a new instance of the StateClient class using Credential source
+                /// </summary>
+                /// <param name="credentialProvider">Credential source to use</param>
+                /// <param name="claimsIdentity">ClaimsIDentity to create the client for</param>
+                /// <param name="handlers">Optional. The delegating handlers to add to the http client pipeline.</param>
+                public StateClient(ICredentialProvider credentialProvider, ClaimsIdentity claimsIdentity = null, params DelegatingHandler[] handlers)
+                    : this(null, credentialProvider, claimsIdentity, handlers: handlers)
+                {
+                }
+//#endif
 
         /// <summary>
         /// Create a new instance of the StateClient class
