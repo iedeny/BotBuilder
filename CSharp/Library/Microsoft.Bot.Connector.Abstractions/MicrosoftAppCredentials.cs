@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.Rest;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 // TODO: FIX ME
 ////#if NET45
@@ -50,42 +51,29 @@ namespace Microsoft.Bot.Connector
 
         protected static readonly ConcurrentDictionary<string, OAuthResponse> cache = new ConcurrentDictionary<string, OAuthResponse>();
 
-        // TODO: FIX ME
-        //#if !NET45
-        //        protected ILogger logger;
-        //#endif
+        protected readonly ILogger logger;
 
-        public MicrosoftAppCredentials(IBotConfiguration configuration)
-            : this(configuration.MicrosoftAppId, configuration.MicrosoftAppPassword)
+        public MicrosoftAppCredentials(IBotConfiguration configuration, ILogger logger)
+            : this (configuration.MicrosoftAppId ?? string.Empty, configuration.MicrosoftAppPassword ?? string.Empty, logger)
         {
         }
 
-        public MicrosoftAppCredentials(string appId, string password)
+        public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger)
+            : this(configuration.GetSection(MicrosoftAppIdKey)?.Value ?? string.Empty, configuration.GetSection(MicrosoftAppPasswordKey)?.Value ?? string.Empty, logger)
+        {
+        }
+
+        public MicrosoftAppCredentials(string appId, string password, ILogger logger = null)
         {
             if (appId == null) throw new ArgumentNullException(nameof(appId));
             if (password == null) throw new ArgumentNullException(nameof(password));
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
 
             MicrosoftAppId = appId;
             MicrosoftAppPassword = password;
+            this.logger = logger;
             TokenCacheKey = $"{MicrosoftAppId}-cache";
         }
-
-        // TODO: FIX ME
-        ////public MicrosoftAppCredentials(string appId = null, string password = null, ILogger logger = null)
-        ////{
-        ////    MicrosoftAppId = appId;
-        ////    MicrosoftAppPassword = password;
-
-        ////    TokenCacheKey = $"{MicrosoftAppId}-cache";
-
-        ////    this.logger = logger;
-        ////}
-
-        // TODO: FIX ME
-        //public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger = null)
-        //    : this(configuration.GetSection(MicrosoftAppIdKey)?.Value, configuration.GetSection(MicrosoftAppPasswordKey)?.Value, logger)
-        //{
-        //}
 
         public string MicrosoftAppId { get; set; }
         public string MicrosoftAppPassword { get; set; }
@@ -176,12 +164,9 @@ namespace Microsoft.Bot.Connector
                 return true;
             }
 
-            // TODO: FIX ME
-            ////#if NET45
-            ////            Trace.TraceWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
-            ////#else
-            ////            logger?.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
-            ////#endif
+            // TODO: FIX ME - we need to find a way to log but this logger is possibly null
+            logger?.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
+
             return false;
         }
 

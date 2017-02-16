@@ -46,6 +46,9 @@ using Microsoft.Bot.Builder.Scorables;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Autofac.Base;
 using System.Configuration;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Bot.Builder.Dialogs.Internals
 {
@@ -67,31 +70,13 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
             return inner;
         }
 
-        // TODO andrees move this to its own file
-        private class BotConfiguration : IBotConfiguration
-        {
-            public string MicrosoftAppId
-            {
-                get
-                {
-                    return ConfigurationManager.AppSettings[MicrosoftAppCredentials.MicrosoftAppIdKey];
-                }
-            }
-
-            public string MicrosoftAppPassword
-            {
-                get
-                {
-                    return ConfigurationManager.AppSettings[MicrosoftAppCredentials.MicrosoftAppPasswordKey];
-                }
-            }
-        }
-
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
 
             builder.RegisterModule(new FiberModule<DialogTask>());
+
+            RegisterPlatformSpecificImplementations(builder);
 
             // singleton components
 
@@ -119,10 +104,6 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .RegisterType<ResumptionCookie>()
                 .AsSelf()
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
-
-            builder.Register(c => new BotConfiguration())
-                .AsImplementedInterfaces()
-                .SingleInstance();
 
             // components not marked as [Serializable]
             builder
@@ -383,6 +364,17 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                     typeof(LogBotToUser)
                 )
                 .InstancePerLifetimeScope();
+        }
+
+        private void RegisterPlatformSpecificImplementations(ContainerBuilder builder)
+        {
+            foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.FullName.StartsWith("Microsoft.Bot.Connector")))
+            {
+                builder.RegisterAssemblyTypes(assembly)
+                    .Where(t => t.IsAssignableTo<IBotConfiguration>()
+                    || t.IsAssignableTo<ILogger>())
+                    .AsImplementedInterfaces();
+            }
         }
     }
 

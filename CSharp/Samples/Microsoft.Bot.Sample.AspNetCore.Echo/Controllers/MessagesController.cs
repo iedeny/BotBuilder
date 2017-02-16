@@ -27,7 +27,7 @@ namespace Microsoft.Bot.Sample.AspNetCore.Echo.Controllers
             string appId = this.configuration.GetSection("MicrosoftAppId")?.Value;
             string password = this.configuration.GetSection("MicrosoftAppPassword")?.Value;
             // var appCredentials = new MicrosoftAppCredentials(this.configuration);
-            var appCredentials = new MicrosoftAppCredentials(appId, password);
+            var appCredentials = new MicrosoftAppCredentials(appId, password, null);
 
             var client = new ConnectorClient(new Uri(activity.ServiceUrl), appCredentials);
             var reply = activity.CreateReply();
