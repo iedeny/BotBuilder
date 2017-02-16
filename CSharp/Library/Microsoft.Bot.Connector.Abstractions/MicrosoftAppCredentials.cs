@@ -6,7 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-// TODO: fix me
+// TODO: FIX ME
 ////#if !NET45
 ////using Microsoft.Extensions.Configuration;
 ////using Microsoft.Extensions.Logging;
@@ -15,7 +15,7 @@ using Microsoft.Rest;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 
-// TODO: fix me
+// TODO: FIX ME
 ////#if NET45
 ////using System.Configuration;
 ////using System.Diagnostics;
@@ -23,7 +23,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Bot.Connector
 {
-    // TODO andrees move this to its own file
+    // TODO: FIX ME (andrees move this to its own file)
     public interface IBotConfiguration
     {
         string MicrosoftAppId { get; }
