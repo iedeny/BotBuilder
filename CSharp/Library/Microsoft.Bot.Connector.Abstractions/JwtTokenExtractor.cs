@@ -46,11 +46,13 @@ namespace Microsoft.Bot.Connector
             _tokenValidationParameters.RequireSignedTokens = true;
 
             if (!_openIdMetadataCache.ContainsKey(metadataUrl))
-#if NET45
-                _openIdMetadataCache[metadataUrl] = new ConfigurationManager<OpenIdConnectConfiguration>(metadataUrl);
-#else
+
+// TODO: FIX ME
+//#if NET45
+//                _openIdMetadataCache[metadataUrl] = new ConfigurationManager<OpenIdConnectConfiguration>(metadataUrl);
+//#else
                 _openIdMetadataCache[metadataUrl] = new ConfigurationManager<OpenIdConnectConfiguration>(metadataUrl, new OpenIdConnectConfigurationRetriever());
-#endif
+//#endif
 
             _openIdMetadata = _openIdMetadataCache[metadataUrl];
         }
