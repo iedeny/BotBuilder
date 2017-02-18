@@ -1,15 +1,15 @@
-﻿// 
+﻿//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license.
-// 
+//
 // Microsoft Bot Framework: http://botframework.com
-// 
-// Bot Builder SDK Github:
+//
+// Bot Builder SDK GitHub:
 // https://github.com/Microsoft/BotBuilder
-// 
+//
 // Copyright (c) Microsoft Corporation
 // All rights reserved.
-// 
+//
 // MIT License:
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -33,6 +33,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -45,10 +46,6 @@ using Microsoft.Bot.Builder.Scorables.Internals;
 using Microsoft.Bot.Builder.Scorables;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Autofac.Base;
-using System.Configuration;
-using System.Linq;
-using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Bot.Builder.Dialogs.Internals
 {
@@ -106,7 +103,7 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             // components not marked as [Serializable]
-            builder                
+            builder
                 .Register(c => new MicrosoftAppCredentials(c.Resolve<ServiceProvider>(), null, null, null))
                 .AsSelf()
                 .SingleInstance();
@@ -141,6 +138,213 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
             builder
                 .Register(c => c.Resolve<IDetectChannelCapability>().Detect())
                 .As<IChannelCapability>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<ConnectorStore, IBotDataStore<BotData>>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<InMemoryDataStore, IBotDataStore<BotData>>()
+                .SingleInstance();
+
+            builder
+                .RegisterKeyedType<CachingBotDataStore, IBotDataStore<BotData>>()
+                .WithParameter((pi, c) => pi.ParameterType == typeof(CachingBotDataStoreConsistencyPolicy),
+                                (pi, c) => CachingBotDataStoreConsistencyPolicy.ETagBasedConsistency)
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterAdapterChain<IBotDataStore<BotData>>
+                (
+                    typeof(ConnectorStore),
+                    typeof(CachingBotDataStore)
+                )
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<JObjectBotData>()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder
+                .Register(c => new DialogTaskManagerBotDataLoader(c.Resolve<JObjectBotData>(),
+                                                 c.Resolve<IDialogTaskManager>()))
+                .As<IBotData>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .Register((c, p) => new BotDataBagStream(p.TypedAs<IBotDataBag>(), p.TypedAs<string>()))
+                .As<Stream>()
+                .InstancePerDependency();
+
+            builder
+                .Register(c => new DialogTaskManager(DialogModule.BlobKey,
+                                                     c.Resolve<JObjectBotData>(),
+                                                     c.Resolve<IStackStoreFactory<DialogTask>>(),
+                                                     c.Resolve<Func<IDialogStack, CancellationToken, IDialogContext>>(),
+                                                     c.Resolve<IEventProducer<IActivity>>()))
+                .AsSelf()
+                .As<IDialogTaskManager>()
+                .As<IDialogTasks>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<DialogSystem>()
+                .As<IDialogSystem>();
+
+            builder
+                .RegisterType<DialogContext>()
+                .As<IDialogContext>()
+                .InstancePerDependency();
+
+            builder
+                .Register(c =>
+                {
+                    var cc = c.Resolve<IComponentContext>();
+
+                    Func<string, IBotDataBag, IStore<IFiberLoop<DialogTask>>> make = (taskId, botDataBag) =>
+                    {
+                        var stream = cc.Resolve<Stream>(TypedParameter.From(botDataBag), TypedParameter.From(taskId));
+                        return cc.Resolve<IStore<IFiberLoop<DialogTask>>>(TypedParameter.From(stream));
+                    };
+
+                    return make;
+                })
+                .As<Func<string, IBotDataBag, IStore<IFiberLoop<DialogTask>>>>()
+                .InstancePerDependency();
+
+
+            builder.Register(c => c.Resolve<IDialogTaskManager>().DialogTasks[0])
+                .As<IDialogStack>()
+                .As<IDialogTask>()
+                .InstancePerLifetimeScope();
+
+            // Scorable implementing "/deleteprofile"
+            builder
+                .Register(c => new Regex("^(\\s)*/deleteprofile", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace))
+                .Keyed<Regex>(Key_DeleteProfile_Regex)
+                .SingleInstance();
+
+            builder
+                .Register(c => new DeleteProfileScorable(c.Resolve<IDialogStack>(), c.Resolve<IBotData>(), c.Resolve<IBotToUser>(), c.ResolveKeyed<Regex>(Key_DeleteProfile_Regex)))
+                .As<IScorable<IActivity, double>>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .Register(c =>
+                {
+                    var cc = c.Resolve<IComponentContext>();
+                    Func<IActivity, IResolver> make = activity =>
+                    {
+                        var resolver = NoneResolver.Instance;
+                        resolver = new EnumResolver(resolver);
+                        resolver = new AutofacResolver(cc, resolver);
+                        resolver = new ArrayResolver(resolver,
+                            activity,
+                            cc.Resolve<IBotToUser>(),
+                            cc.Resolve<IBotData>(),
+                            cc.Resolve<IDialogSystem>());
+                        resolver = new ActivityResolver(resolver);
+                        resolver = new EventActivityValueResolver(resolver);
+                        resolver = new InvokeActivityValueResolver(resolver);
+                        return resolver;
+                    };
+                    return make;
+                })
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<DialogRouter>()
+                .Keyed<IScorable<IActivity, double>>(Key_Dialog_Router)
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<EventQueue<IActivity>>()
+                .AsImplementedInterfaces()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<ReactiveDialogTask>()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder
+                .Register(c => new ScoringEventLoop<double>(c.Resolve<ReactiveDialogTask>(), c.Resolve<ReactiveDialogTask>(), c.Resolve<IEventConsumer<IActivity>>(), c.ResolveKeyed<IScorable<IActivity, double>>(Key_Dialog_Router)))
+                .As<IEventLoop>()
+                .InstancePerLifetimeScope();
+
+            // IPostToBot services
+
+            builder
+                .RegisterKeyedType<NullPostToBot, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<PersistentDialogTask, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<ExceptionTranslationDialogTask, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<SerializeByConversation, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<SetAmbientThreadCulture, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<PostUnhandledExceptionToUser, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<LogPostToBot, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterAdapterChain<IPostToBot>
+                (
+                    typeof(PersistentDialogTask),
+                    typeof(ExceptionTranslationDialogTask),
+                    typeof(SerializeByConversation),
+                    typeof(SetAmbientThreadCulture),
+                    typeof(PostUnhandledExceptionToUser),
+                    typeof(LogPostToBot)
+                )
+                .InstancePerLifetimeScope();
+
+            // other
+
+            builder
+                .RegisterType<NullActivityLogger>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder
+                .RegisterType<KeyboardCardMapper>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            // IBotToUser services
+
+            builder
+                .RegisterKeyedType<NullBotToUser, IBotToUser>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<AlwaysSendDirect_BotToUser, IBotToUser>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<MapToChannelData_BotToUser, IBotToUser>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<LogBotToUser, IBotToUser>()
                 .InstancePerLifetimeScope();
 
             builder
