@@ -163,22 +163,12 @@ namespace Microsoft.Bot.Connector
             return false;
         }
 
-#if NET45
-        [Serializable]
-#endif
         public sealed class OAuthException : Exception
         {
             public OAuthException(string body, Exception inner)
                 : base(body, inner)
             {
             }
-
-#if NET45
-            private OAuthException(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-            }
-#endif
         }
 
         private async Task<OAuthResponse> RefreshTokenAsync()
