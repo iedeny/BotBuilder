@@ -76,7 +76,7 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
 
             builder.RegisterModule(new FiberModule<DialogTask>());
 
-            RegisterPlatformSpecificImplementations(builder);
+            RegisterBotConnectorImplementation(builder);
 
             // singleton components
 
@@ -106,8 +106,8 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             // components not marked as [Serializable]
-            builder
-                .RegisterType<MicrosoftAppCredentials>()
+            builder                
+                .Register(c => new MicrosoftAppCredentials(c.Resolve<ServiceProvider>(), null, null, null))
                 .AsSelf()
                 .SingleInstance();
 
@@ -366,14 +366,40 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .InstancePerLifetimeScope();
         }
 
-        private void RegisterPlatformSpecificImplementations(ContainerBuilder builder)
+        /// <summary>
+        /// Registers (platform specific) bot connector implementations.
+        /// </summary>
+        /// <param name="builder">The builder used to register dependencies.</param>
+        private void RegisterBotConnectorImplementation(ContainerBuilder builder)
         {
-            foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies().Where(a => a.FullName.StartsWith("Microsoft.Bot.Connector")))
+            if (ServiceProvider.IsRegistered)
             {
-                builder.RegisterAssemblyTypes(assembly)
-                    .Where(t => t.IsAssignableTo<IBotConfiguration>()
-                    || t.IsAssignableTo<ILogger>())
-                    .AsImplementedInterfaces();
+                builder.Register<ServiceProvider>(c => ServiceProvider.Instance)
+                    .AsSelf()
+                    .SingleInstance();
+            }
+            else
+            {
+                // Finds the bot connector being used in this application domain
+                // that is not the common connector assembly
+                System.Reflection.Assembly connectorAssembly = AppDomain.CurrentDomain.
+                    GetAssemblies()
+                    .Where(a => a.FullName.StartsWith("Microsoft.Bot.Connector"))
+                    .Where(a => a != typeof(BotData).Assembly)
+                    .FirstOrDefault();
+
+                if (connectorAssembly != null)
+                {
+                    // register the IServiceProvider instance provided in the connector with the Common connector
+                    builder.RegisterAssemblyTypes(connectorAssembly)
+                        .Where(t => t.IsAssignableTo<IServiceProvider>())
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+
+                    builder.Register<ServiceProvider>(c => { ServiceProvider.RegisterServiceProvider(c.Resolve<IServiceProvider>()); return ServiceProvider.Instance; })
+                        .AsSelf()
+                        .SingleInstance();
+                }
             }
         }
     }

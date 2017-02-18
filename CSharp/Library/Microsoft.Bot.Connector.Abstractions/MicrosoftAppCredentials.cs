@@ -5,33 +5,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-
-// TODO: FIX ME
-////#if !NET45
-////using Microsoft.Extensions.Configuration;
-////using Microsoft.Extensions.Logging;
-////#endif
 using Microsoft.Rest;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-// TODO: FIX ME
-////#if NET45
-////using System.Configuration;
-////using System.Diagnostics;
-////#endif
-
 namespace Microsoft.Bot.Connector
 {
-    // TODO: FIX ME (andrees move this to its own file)
-    public interface IBotConfiguration
-    {
-        string MicrosoftAppId { get; }
-
-        string MicrosoftAppPassword { get; }
-    }
-
     public class MicrosoftAppCredentials : ServiceClientCredentials
     {
         /// <summary>
@@ -53,26 +33,26 @@ namespace Microsoft.Bot.Connector
 
         protected readonly ILogger logger;
 
-        public MicrosoftAppCredentials(IBotConfiguration configuration, ILogger logger)
-            : this (configuration.MicrosoftAppId ?? string.Empty, configuration.MicrosoftAppPassword ?? string.Empty, logger)
+        public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger = null)
+            : this(configuration.GetSection(MicrosoftAppIdKey)?.Value, configuration.GetSection(MicrosoftAppPasswordKey)?.Value, logger)
         {
         }
 
-        public MicrosoftAppCredentials(IConfiguration configuration, ILogger logger)
-            : this(configuration.GetSection(MicrosoftAppIdKey)?.Value ?? string.Empty, configuration.GetSection(MicrosoftAppPasswordKey)?.Value ?? string.Empty, logger)
-        {
+        public MicrosoftAppCredentials(string appId = null, string password = null, ILogger logger = null)
+            : this(ServiceProvider.Instance, appId, password, logger)
+        {                      
         }
 
-        public MicrosoftAppCredentials(string appId, string password, ILogger logger = null)
+        public MicrosoftAppCredentials(ServiceProvider serviceProvider, string appId, string password, ILogger logger)
         {
-            if (appId == null) throw new ArgumentNullException(nameof(appId));
-            if (password == null) throw new ArgumentNullException(nameof(password));
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            this.MicrosoftAppId = appId
+                ?? serviceProvider.ConfigurationRoot.GetSection(MicrosoftAppIdKey)?.Value;
 
-            MicrosoftAppId = appId;
-            MicrosoftAppPassword = password;
-            this.logger = logger;
-            TokenCacheKey = $"{MicrosoftAppId}-cache";
+            this.MicrosoftAppPassword = password
+                ?? serviceProvider.ConfigurationRoot.GetSection(MicrosoftAppPasswordKey)?.Value;
+
+            this.TokenCacheKey = $"{MicrosoftAppId}-cache";
+            this.logger = logger ?? serviceProvider.CreateLogger();
         }
 
         public string MicrosoftAppId { get; set; }
@@ -103,10 +83,10 @@ namespace Microsoft.Bot.Connector
                     TrustedHostNames.AddOrUpdate(new Uri(serviceUrl).Host, expirationTime, (key, oldValue) => expirationTime);
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // TODO: FIX ME
-                // Trace.TraceWarning($"Service url {serviceUrl} is not a well formed Uri!");
+                ServiceProvider.Instance.CreateLogger().LogWarning($"Service url {serviceUrl} is not a well formed Uri!");
+                ServiceProvider.Instance.CreateLogger().LogWarning(e.ToString());
             }
         }
 
@@ -164,8 +144,7 @@ namespace Microsoft.Bot.Connector
                 return true;
             }
 
-            // TODO: FIX ME - we need to find a way to log but this logger is possibly null
-            logger?.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
+            this.logger.LogWarning($"Service url {request.RequestUri.Authority} is not trusted and JwtToken cannot be sent to it.");
 
             return false;
         }

@@ -42,9 +42,7 @@
     <Compile Include="BotAuthentication.cs" />
     <Compile Include="BotAuthenticationHandler.cs" />
     <Compile Include="BotAuthenticationOptions.cs" />
-    <Compile Include="BotConfiguration.cs" />
     <Compile Include="BotServiceProvider.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

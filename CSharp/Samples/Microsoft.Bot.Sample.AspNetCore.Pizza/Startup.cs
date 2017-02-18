@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Bot.Connector;
-using Microsoft.Bot.Connector.AspNetCore;
 
 namespace Microsoft.Bot.Sample.AspNetCore.Pizza
 {
