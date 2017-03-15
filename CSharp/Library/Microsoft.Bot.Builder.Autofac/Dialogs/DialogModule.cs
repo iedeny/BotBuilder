@@ -1,15 +1,15 @@
-﻿// 
+﻿//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license.
-// 
+//
 // Microsoft Bot Framework: http://botframework.com
-// 
+//
 // Bot Builder SDK GitHub:
 // https://github.com/Microsoft/BotBuilder
-// 
+//
 // Copyright (c) Microsoft Corporation
 // All rights reserved.
-// 
+//
 // MIT License:
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -36,15 +36,20 @@ using System.IO;
 using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
-
 using Autofac;
+using Microsoft.Bot.Builder.Autofac.Base;
 using Microsoft.Bot.Builder.Base;
+using Microsoft.Bot.Builder.ConnectorEx;
 using Microsoft.Bot.Builder.History;
 using Microsoft.Bot.Builder.Internals.Fibers;
-using Microsoft.Bot.Builder.Scorables.Internals;
 using Microsoft.Bot.Builder.Scorables;
+using Microsoft.Bot.Builder.Scorables.Internals;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Autofac.Base;
+using System.Configuration;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Bot.Builder.Dialogs.Internals
 {
@@ -72,6 +77,8 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
 
             builder.RegisterModule(new FiberModule<DialogTask>());
 
+            RegisterBotConnectorImplementation(builder);
+
             // singleton components
 
             builder
@@ -94,14 +101,21 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .AsImplementedInterfaces()
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
+#pragma warning disable CS0618
             builder
                 .RegisterType<ResumptionCookie>()
+                .AsSelf()
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
+#pragma warning restore CS0618
+
+            builder
+                .Register(c => c.Resolve<IActivity>().ToConversationReference())
                 .AsSelf()
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             // components not marked as [Serializable]
             builder
-                .RegisterType<MicrosoftAppCredentials>()
+                .Register(c => new MicrosoftAppCredentials(c.Resolve<ServiceProvider>(), null, null, null))
                 .AsSelf()
                 .SingleInstance();
 
@@ -176,8 +190,8 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .InstancePerDependency();
 
             builder
-                .Register(c => new DialogTaskManager(DialogModule.BlobKey, 
-                                                     c.Resolve<JObjectBotData>(), 
+                .Register(c => new DialogTaskManager(DialogModule.BlobKey,
+                                                     c.Resolve<JObjectBotData>(),
                                                      c.Resolve<IStackStoreFactory<DialogTask>>(),
                                                      c.Resolve<Func<IDialogStack, CancellationToken, IDialogContext>>(),
                                                      c.Resolve<IEventProducer<IActivity>>()))
@@ -272,10 +286,39 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .As<IEventLoop>()
                 .InstancePerLifetimeScope();
 
+            // register IDataBag that is used for to load/save ResumptionData
+            builder
+                .Register(c =>
+                {
+                    var cc = c.Resolve<IComponentContext>();
+                    Func<IBotDataBag> make = () =>
+                    {
+                        return cc.Resolve<IBotData>().PrivateConversationData;
+                    };
+                    return make;
+                })
+                .As<Func<IBotDataBag>>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<ResumptionContext>()
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterType<LocaleFinder>()
+                .AsSelf()
+                .AsImplementedInterfaces()
+                .InstancePerLifetimeScope();
+
             // IPostToBot services
 
             builder
                 .RegisterKeyedType<NullPostToBot, IPostToBot>()
+                .InstancePerLifetimeScope();
+
+            builder
+                .RegisterKeyedType<EventLoopDialogTask, IPostToBot>()
                 .InstancePerLifetimeScope();
 
             builder
@@ -305,10 +348,11 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
             builder
                 .RegisterAdapterChain<IPostToBot>
                 (
+                    typeof(EventLoopDialogTask),
+                    typeof(SetAmbientThreadCulture),
                     typeof(PersistentDialogTask),
                     typeof(ExceptionTranslationDialogTask),
                     typeof(SerializeByConversation),
-                    typeof(SetAmbientThreadCulture),
                     typeof(PostUnhandledExceptionToUser),
                     typeof(LogPostToBot)
                 )
@@ -344,12 +388,12 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                 .RegisterKeyedType<LogBotToUser, IBotToUser>()
                 .InstancePerLifetimeScope();
 
-            #pragma warning disable CS1587
+#pragma warning disable CS1587
             /// <see cref="LogBotToUser"/> is composed around <see cref="MapToChannelData_BotToUser"/> is composed around
             /// <see cref="AlwaysSendDirect_BotToUser"/>.  The complexity of registering each component is pushed to a separate
             /// registration method, and each of these components are replaceable without re-registering
             /// the entire adapter chain by registering a new component with the same component key.
-            #pragma warning restore CS1587
+#pragma warning restore CS1587
             builder
                 .RegisterAdapterChain<IBotToUser>
                 (
@@ -358,6 +402,43 @@ namespace Microsoft.Bot.Builder.Dialogs.Internals
                     typeof(LogBotToUser)
                 )
                 .InstancePerLifetimeScope();
+        }
+
+        /// <summary>
+        /// Registers (platform specific) bot connector implementations.
+        /// </summary>
+        /// <param name="builder">The builder used to register dependencies.</param>
+        private void RegisterBotConnectorImplementation(ContainerBuilder builder)
+        {
+            if (ServiceProvider.IsRegistered)
+            {
+                builder.Register<ServiceProvider>(c => ServiceProvider.Instance)
+                    .AsSelf()
+                    .SingleInstance();
+            }
+            else
+            {
+                // Finds the bot connector being used in this application domain
+                // that is not the common connector assembly
+                System.Reflection.Assembly connectorAssembly = AppDomain.CurrentDomain.
+                    GetAssemblies()
+                    .Where(a => a.FullName.StartsWith("Microsoft.Bot.Connector"))
+                    .Where(a => a != typeof(BotData).Assembly)
+                    .FirstOrDefault();
+
+                if (connectorAssembly != null)
+                {
+                    // register the IServiceProvider instance provided in the connector with the Common connector
+                    builder.RegisterAssemblyTypes(connectorAssembly)
+                        .Where(t => t.IsAssignableTo<IServiceProvider>())
+                        .AsImplementedInterfaces()
+                        .SingleInstance();
+
+                    builder.Register<ServiceProvider>(c => { if (!ServiceProvider.IsRegistered) { ServiceProvider.RegisterServiceProvider(c.Resolve<IServiceProvider>()); } return ServiceProvider.Instance; })
+                        .AsSelf()
+                        .SingleInstance();
+                }
+            }
         }
     }
 
